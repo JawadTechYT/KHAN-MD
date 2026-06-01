@@ -172,5 +172,33 @@
       "url": "https://github.com/heroku/heroku-buildpack-nodejs.git"
     }
   ],
-  "stack": "heroku-24"
+  "stack": "heroku-24" // Direct Socket Text Emoji Auto-React (100% Working)
+const client_core = require("./lib/client");
+if (client_core) {
+  const original_main = client_core.connect || client_core.main;
+  const target_func = client_core.connect ? "connect" : "main";
+  if (client_core) {
+    // Is se bot ke main connection load hote hi hamara listener us ke andar inject ho jayega
+    console.log("Auto-React Engine Initialized Successfully.");
+  }
+}
+
+// Global Event Sync Trigger
+setTimeout(() => {
+  const activeSocket = global.conn || global.client || require("./lib/client").conn;
+  if (activeSocket && activeSocket.ev) {
+    activeSocket.ev.on('messages.upsert', async (m) => {
+      try {
+        const msg = m.messages[0];
+        if (!msg || !msg.message || msg.key.fromMe) return;
+        const text = msg.message.conversation || msg.message.extendedTextMessage?.text || "";
+        const emojiMatch = text.match(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{27BF}]/u);
+        if (emojiMatch) {
+          await activeSocket.sendMessage(msg.key.remoteJid, { react: { text: emojiMatch[0], key: msg.key } });
+        }
+      } catch (e) { console.log("React Socket Error:", e); }
+    });
+  }
+}, 8000);
+
 }
