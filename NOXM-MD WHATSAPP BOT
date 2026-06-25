@@ -1,0 +1,185 @@
+const { 
+    default: makeWASocket, 
+    useMultiFileAuthState, 
+    downloadContentFromMessage 
+} = require("@whiskeysockets/baileys");
+const { OpenAI } = require("openai");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const qrcode = require("qrcode-terminal");
+const fs = require('fs');
+const axios = require('axios');
+const { exec } = require("child_process");
+const path = require("path");
+const pino = require('pino');
+
+// ==========================================
+// ⚙️ CONFIGURATION
+// ==========================================
+const OPENAI_KEY = 'YOUR_OPENAI_API_KEY';
+const GEMINI_KEY = 'YOUR_GEMINI_API_KEY';
+const WEATHER_KEY = 'YOUR_OPENWEATHER_KEY';
+const botName = 'NOXM-MD';
+const prefix = '.';
+
+const openai = new OpenAI({ apiKey: OPENAI_KEY });
+const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+
+if (!fs.existsSync('./tmp')) fs.mkdirSync('./tmp');
+const pointDb = './tmp/points.json';
+if (!fs.existsSync(pointDb)) fs.writeFileSync(pointDb, JSON.stringify({}));
+
+// ==========================================
+// 🛠️ HELPER FUNCTIONS
+// ==========================================
+function addPoints(userId, amount) {
+    let data = JSON.parse(fs.readFileSync(pointDb));
+    data[userId] = (data[userId] || 0) + amount;
+    fs.writeFileSync(pointDb, JSON.stringify(data));
+    return data[userId];
+}
+
+const getRandom = (ext) => `${Math.floor(Math.random() * 10000)}${ext}`;
+
+async function imageToWebp(media) {
+    const tmpIn = path.join(__dirname, `./tmp/${getRandom('.jpg')}`);
+    const tmpOut = path.join(__dirname, `./tmp/${getRandom('.webp')}`);
+    fs.writeFileSync(tmpIn, media);
+    await new Promise((res, rej) => {
+        exec(`ffmpeg -i ${tmpIn} -vcodec libwebp -filter:v fps=fps=20 -lossless 1 -loop 0 -preset default -an -vsync 0 -s 512:512 ${tmpOut}`, (err) => {
+            if (err) rej(err); res();
+        });
+    });
+    const buff = fs.readFileSync(tmpOut);
+    fs.unlinkSync(tmpIn); fs.unlinkSync(tmpOut);
+    return buff;
+}
+
+// ==========================================
+// 🚀 START BOT
+// ==========================================
+async function startNoxm() {
+    const { state, saveCreds } = await useMultiFileAuthState('session_noxm');
+    const sock = makeWASocket({
+        auth: state,
+        printQRInTerminal: true,
+        logger: pino({ level: 'silent' }),
+        browser: [botName, 'iOS', '1.0.0']
+    });
+
+    sock.ev.on('creds.update', saveCreds);
+
+    sock.ev.on('messages.upsert', async m => {
+        const msg = m.messages[0];
+        if (!msg.message || msg.key.fromMe) return;
+
+        const from = msg.key.remoteJid;
+        const sender = msg.key.participant || from;
+        const type = Object.keys(msg.message)[0];
+        const body = (type === 'conversation') ? msg.message.conversation : (type === 'extendedTextMessage') ? msg.message.extendedTextMessage.text : (type === 'imageMessage') ? msg.message.imageMessage.caption : '';
+        const args = body.trim().split(/ +/).slice(1);
+        const command = body.startsWith(prefix) ? body.slice(1).trim().split(/ +/)[0].toLowerCase() : '';
+
+        // Auto Read & Typing Presence
+        await sock.readMessages([msg.key]);
+        if (command) await sock.sendPresenceUpdate('composing', from);
+
+        // 🔓 ANTI-VIEW ONCE
+        if (type === 'viewOnceMessageV2' || type === 'viewOnceMessage') {
+            try {
+                let vv = msg.message.viewOnceMessageV2?.message || msg.message.viewOnceMessage?.message;
+                let vtype = Object.keys(vv)[0];
+                const stream = await downloadContentFromMessage(vv[vtype], vtype.replace('Message', ''));
+                let buffer = Buffer.from([]);
+                for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
+                await sock.sendMessage(from, { [vtype.replace('Message', '')]: buffer, caption: `*🔓 [ᴀɴᴛɪ-ᴠᴠ ᴅᴇᴛᴇᴄᴛᴇᴅ]* \nCaptured by ${botName}! 📸` }, { quoted: msg });
+            } catch (e) {}
+        }
+
+        switch (command) {
+            case 'menu':
+                const myP = JSON.parse(fs.readFileSync(pointDb))[sender] || 0;
+                const menu = `*╭────「 ${botName} ᴜʟᴛɪᴍᴀᴛᴇ 」────*
+│ 👤 *User:* @${sender.split('@')[0]}
+│ 💰 *Points:* ${myP}
+│
+│ 🤖 *ᴍᴜʟᴛɪ-ᴀɪ ᴇɴɢɪɴᴇ*
+│ ‣ .gpt | .gemini | .meta | .kling
+│
+│ 🧠 *ᴇᴅᴜ-ᴀɪ (ᴀᴜᴛᴏ-ʟᴀɴɢ)*
+│ ‣ Chat directly for AI Tutor
+│ ‣ .tr [lang] | .wiki | .brainly
+│
+│ 🔍 *sᴇᴀʀᴄʜ ғᴇᴀᴛᴜʀᴇs*
+│ ‣ .google | .yts | .pin 📌
+│
+│ 🎮 *ɢᴀᴍᴇs (ᴇᴀʀɴ ᴘᴏɪɴᴛs)*
+│ ‣ .tambang | .polisi | .suit
+│ ‣ .tebakbendera | .tebaknegara
+│
+│ 🎨 *ᴄʀᴇᴀᴛɪᴠᴇ & sᴛɪᴄᴋᴇʀ*
+│ ‣ .brat | .sticker | .genimage | .toimg
+│
+│ 📥 *ᴅᴏᴡɴʟᴏᴀᴅᴇʀ*
+│ ‣ .play | .ytmp4 | .tiktok | .ig
+│
+│ 🕋 *ʀᴇʟɪɢɪᴏɴ*
+│ ‣ .sholat | .bible | .quotes
+│
+│ 🌐 *ᴜᴛɪʟs & ᴀᴅᴍɪɴ*
+│ ‣ .weather | .poll | .tagall
+│ ‣ .forward | .points | .del
+│
+*╰──────────────────────────*`;
+                await sock.sendMessage(from, { text: menu, mentions: [sender] });
+                break;
+
+            case 'gpt':
+                const gptRes = await openai.chat.completions.create({ model: "gpt-4o", messages: [{ role: "user", content: args.join(" ") }] });
+                await sock.sendMessage(from, { text: `*🤖 ChatGPT:* \n\n${gptRes.choices[0].message.content}` });
+                break;
+
+            case 'gemini':
+                const gemModel = genAI.getGenerativeModel({ model: "gemini-pro" });
+                const gemRes = await gemModel.generateContent(args.join(" "));
+                await sock.sendMessage(from, { text: `*♊ Gemini:* \n\n${gemRes.response.text()}` });
+                break;
+
+            case 'pin':
+                await sock.sendMessage(from, { image: { url: `https://api.lolhuman.xyz/api/pinterest?apikey=FREE&query=${args[0]}` }, caption: `📌 Result for: ${args.join(" ")}` });
+                break;
+
+            case 'forward':
+                if (!msg.message.extendedTextMessage?.contextInfo) return;
+                await sock.sendMessage(args[0], { forward: msg.message.extendedTextMessage.contextInfo.quotedMessage });
+                break;
+
+            case 'tambang':
+                const loot = [{n:'💎',p:500},{n:'💣',p:-100}];
+                const getT = loot[Math.floor(Math.random()*loot.length)];
+                addPoints(sender, getT.p);
+                await sock.sendMessage(from, { text: `⛏️ Found ${getT.n}! Balance: ${addPoints(sender, 0)}` });
+                break;
+
+            case 'brat':
+                const bRes = await axios.get(`https://aqul-brat.vercel.app/api/brat?text=${encodeURIComponent(args.join(" "))}`, { responseType: 'arraybuffer' });
+                const sB = await imageToWebp(Buffer.from(bRes.data));
+                await sock.sendMessage(from, { sticker: sB });
+                break;
+
+            default:
+                if (!command && body.length > 3) {
+                    try {
+                        const ai = await openai.chat.completions.create({
+                            model: "gpt-4o",
+                            messages: [
+                                { role: "system", content: `You are ${botName} AI Tutor. Detect language and reply in the same language. Use Socratic method. Use iPhone emojis.` },
+                                { role: "user", content: body }
+                            ]
+                        });
+                        await sock.sendMessage(from, { text: `*💡 ${botName} ᴀɪ:* \n\n${ai.choices[0].message.content}` }, { quoted: msg });
+                    } catch (e) {}
+                }
+        }
+    });
+}
+startNoxm();
