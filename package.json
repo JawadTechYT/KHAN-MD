@@ -10,7 +10,7 @@
     "restart": "pm2 restart KHAN-MD"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "7.0.0-rc.9",
+    "@whiskeysockets/baileys": "7.0.0-rc14",
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@vitalets/google-translate-api": "^9.2.1",
     "pino": "^9.7.0",
