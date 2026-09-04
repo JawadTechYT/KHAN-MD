@@ -27,14 +27,24 @@
       "value": "public"
     },
     "OWNER_NUMBER": {
-      "description": "Owner WhatsApp number without + (Default: 923427582273)",
+      "description": "Owner WhatsApp number without + (Default: 92342*******)",
       "required": false,
-      "value": "923427582273"
+      "value": "92342*******"
     },
     "OWNER_NAME": {
       "description": "Owner name (Default: Jᴀᴡᴀᴅ TᴇᴄʜX)",
       "required": false,
       "value": "Jᴀᴡᴀᴅ TᴇᴄʜX"
+    },
+    "HEROKU_API_KEY": {
+      "description": "Heroku API key if deploying on heroku",
+      "required": false,
+      "value": ""
+    },
+    "HEROKU_APP_NAME": {
+      "description": "Heroku app name if deploying on heroku",
+      "required": false,
+      "value": ""
     },
     "AUTO_REPLY": {
       "description": "Auto reply to messages: true/false (Default: false)",
@@ -73,6 +83,11 @@
     },
     "ANTI_LINK": {
       "description": "Anti-link mode: true/warn/delete/false (Default: true)",
+      "required": false,
+      "value": "true"
+    },
+    "ANTI_STATUS": {
+      "description": "Anti-status mention mode: true/warn/delete/false (Default: true)",
       "required": false,
       "value": "true"
     },
