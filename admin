@@ -1,0 +1,9 @@
+export async function before(m, { isAdmin, isBotAdmin }) {
+    if (!m.isGroup) return
+    if (!m.text.startsWith('.') && !m.text.startsWith('!')) return
+    
+    // Se chi scrive NON è admin, blocca
+    if (!isAdmin) {
+        return true // blocca il comando
+    }
+}
