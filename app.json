@@ -1,8 +1,8 @@
 {
-  "name": "KHAN-MD",
-  "description": "Javascript WhatsApp bot made by Jᴀᴡᴀᴅ TᴇᴄʜX",
+  "name": "꧁༒☬𝐊𝐈𝐍𝐆 𝐁𝐎𝐓☬༒꧂",
+  "description": "Javascript WhatsApp bot made by RITA WINWIN",
   "logo": "https://files.catbox.moe/6zd0ru.jpg",
-  "keywords": ["KHAN-MD"],
+  "keywords": ["꧁༒☬𝐊𝐈𝐍𝐆 𝐁𝐎𝐓☬༒꧂"],
   "success_url": "/",
   "stack": "container",
   "env": {
@@ -19,7 +19,7 @@
     "BOT_NAME": {
       "description": "Your bot name (Default: KHAN-MD)",
       "required": false,
-      "value": "KHAN-MD"
+      "value": "꧁༒☬𝐊𝐈𝐍𝐆 𝐁𝐎𝐓☬༒꧂"
     },
     "MODE": {
       "description": "Bot mode: public/private/inbox/groups (Default: private)",
@@ -29,12 +29,12 @@
     "OWNER_NUMBER": {
       "description": "Owner WhatsApp number without + (Default: 92342*******)",
       "required": false,
-      "value": "92342*******"
+      "value": "905363094577"
     },
     "OWNER_NAME": {
       "description": "Owner name (Default: Jᴀᴡᴀᴅ TᴇᴄʜX)",
       "required": false,
-      "value": "Jᴀᴡᴀᴅ TᴇᴄʜX"
+      "value": "RITA WINWIN"
     },
     "HEROKU_API_KEY": {
       "description": "Heroku API key if deploying on heroku",

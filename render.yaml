@@ -1,0 +1,77 @@
+# Exported from Render on 2026-10-31T17:26:46Z
+version: "1"
+services:
+- type: web
+  name: bot-roshan
+  runtime: docker
+  repo: https://github.com/roshanlontsi-code/KHANXMD
+  plan: free
+  envVars:
+  - key: SESSION_ID_2
+    sync: false
+  - key: SESSION_ID
+    sync: false
+  - key: ADMIN_ACTION
+    sync: false
+  - key: WELCOME
+    sync: false
+  - key: STICKER_NAME
+    sync: false
+  - key: READ_MESSAGE
+    sync: false
+  - key: MENU_IMAGE_URL
+    sync: false
+  - key: MENTION_REPLY
+    sync: false
+  - key: GOODBYE
+    sync: false
+  - key: DESCRIPTION
+    sync: false
+  - key: DELETE_LINKS
+    sync: false
+  - key: CUSTOM_REACT_EMOJIS
+    sync: false
+  - key: CUSTOM_REACT
+    sync: false
+  - key: AUTO_TYPING
+    sync: false
+  - key: AUTO_STICKER
+    sync: false
+  - key: AUTO_STATUS_SEEN
+    sync: false
+  - key: AUTO_STATUS_REPLY
+    sync: false
+  - key: AUTO_STATUS_REACT
+    sync: false
+  - key: AUTO_STATUS_MSG
+    sync: false
+  - key: AUTO_REPLY
+    sync: false
+  - key: AUTO_RECORDING
+    sync: false
+  - key: AUTO_REACT
+    sync: false
+  - key: ANTI_LINK
+    sync: false
+  - key: ANTI_DELETE
+    sync: false
+  - key: ANTI_DEL_PATH
+    sync: false
+  - key: ANTI_BAD
+    sync: false
+  - key: ALWAYS_ONLINE
+    sync: false
+  - key: MODE
+    sync: false
+  - key: PREFIX
+    sync: false
+  - key: OWNER_NUMBER
+    sync: false
+  - key: OWNER_NAME
+    sync: false
+  - key: BOT_NAME
+    sync: false
+  region: frankfurt
+  dockerContext: .
+  dockerfilePath: ./Dockerfile
+  autoDeployTrigger: commit
